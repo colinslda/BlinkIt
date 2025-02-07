@@ -1,6 +1,6 @@
 {
-    "name": "Défi Express",
-    "short_name": "Défi Express",
+    "name": "BlinkIt",  /* Nom de l'application mis à jour */
+    "short_name": "BlinkIt", /* Nom court mis à jour */
     "description": "Mini-challenges amusants entre amis",
     "start_url": "/",
     "display": "standalone",
