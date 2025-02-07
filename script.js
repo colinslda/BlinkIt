@@ -7,13 +7,13 @@
 
 // Configuration Firebase (remplacez avec vos propres informations)
 const firebaseConfig = {
-    apiKey: "AIzaSyBzxLd2CtrDwrbdvCpJcmWreCFYzus4pxc",
-  authDomain: "cocoapp-59806.firebaseapp.com",
-  projectId: "cocoapp-59806",
-  storageBucket: "cocoapp-59806.firebasestorage.app",
-  messagingSenderId: "150646140905",
-  appId: "1:150646140905:web:fe18d100afd0d88dc9e578",
-  measurementId: "G-47KFT0SRS4"
+    apiKey: "VOTRE_API_KEY",
+    authDomain: "VOTRE_AUTH_DOMAIN",
+    projectId: "VOTRE_PROJECT_ID",
+    storageBucket: "VOTRE_STORAGE_BUCKET",
+    messagingSenderId: "VOTRE_MESSAGING_SENDER_ID",
+    appId: "VOTRE_APP_ID",
+    databaseURL: "VOTRE_DATABASE_URL" // Si vous utilisez Realtime Database
 };
 
 // Initialisation de Firebase
@@ -21,11 +21,8 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore(); // Utilisation de Firestore
 
-// Sélection des éléments HTML
-const authSection = document.getElementById('auth-section');
+// Sélection des éléments HTML (mis à jour pour index.html)
 const appSection = document.getElementById('app-section');
-const signupForm = document.getElementById('signup-form');
-const loginForm = document.getElementById('login-form');
 const logoutButton = document.getElementById('logout-button');
 const userInfoSpan = document.getElementById('user-email');
 const challengeTextDisplay = document.getElementById('challenge-text');
@@ -35,6 +32,11 @@ const postImageInput = document.getElementById('post-image');
 const postAudioInput = document.getElementById('post-audio');
 const submitPostButton = document.getElementById('submit-post-button');
 const postsListDiv = document.getElementById('posts-list');
+const initialSection = document.getElementById('initial-section'); // Nouvelle section d'accueil
+
+// Sélection des éléments HTML pour login.html et signup.html (seulement si on est sur ces pages)
+const signupForm = document.getElementById('signup-form'); // Seulement sur signup.html
+const loginForm = document.getElementById('login-form');   // Seulement sur login.html
 
 // Défis aléatoires (ajoutez plus de défis)
 const challenges = [
@@ -47,18 +49,18 @@ const challenges = [
 
 let currentChallenge = "";
 
-// Fonction pour choisir un défi aléatoire
+// Fonction pour choisir un défi aléatoire (inchangée)
 function getRandomChallenge() {
     return challenges[Math.floor(Math.random() * challenges.length)];
 }
 
-// Fonction pour afficher le défi
+// Fonction pour afficher le défi (inchangée)
 function displayChallenge() {
     currentChallenge = getRandomChallenge();
     challengeTextDisplay.textContent = currentChallenge;
 }
 
-// Fonction pour créer un post sur Firebase
+// Fonction pour créer un post sur Firebase (inchangée)
 async function createPost(content, imageFile, audioFile, userId, userEmail) {
     try {
         const postData = {
@@ -99,7 +101,7 @@ async function createPost(content, imageFile, audioFile, userId, userEmail) {
 }
 
 
-// Fonction pour récupérer et afficher les posts depuis Firebase
+// Fonction pour récupérer et afficher les posts depuis Firebase (inchangée)
 async function fetchPosts() {
     postsListDiv.innerHTML = ''; // Vider la liste actuelle
 
@@ -117,7 +119,7 @@ async function fetchPosts() {
     }
 }
 
-// Fonction pour créer un élément HTML pour un post
+// Fonction pour créer un élément HTML pour un post (inchangée)
 function createPostElement(postId, postData) {
     const postDiv = document.createElement('div');
     postDiv.className = 'post';
@@ -138,7 +140,7 @@ function createPostElement(postId, postData) {
         </div>
     `;
 
-    // Ajout des listeners pour les boutons de vote et like (exemple basique)
+    // Ajout des listeners pour les boutons de vote et like (exemple basique) (inchangée)
     const voteButton = postDiv.querySelector('.vote-button');
     const likeButton = postDiv.querySelector('.like-button');
 
@@ -153,7 +155,7 @@ function createPostElement(postId, postData) {
     return postDiv;
 }
 
-// Fonction pour mettre à jour les réactions (votes, likes) sur Firebase
+// Fonction pour mettre à jour les réactions (votes, likes) sur Firebase (inchangée)
 async function updateReaction(postId, reactionType) {
     try {
         const postRef = db.collection('posts').doc(postId);
@@ -176,43 +178,49 @@ async function updateReaction(postId, reactionType) {
 
 
 // --- AUTHENTIFICATION ---
-signupForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = signupForm.signupEmail.value;
-    const password = signupForm.signupPassword.value;
+// Gestion du formulaire d'inscription (seulement si signupForm existe sur la page)
+if (signupForm) {
+    signupForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = signupForm.signupEmail.value;
+        const password = signupForm.signupPassword.value;
 
-    try {
-        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-        const user = userCredential.user;
-        alert('Inscription réussie ! Connectez-vous.');
-        authSection.style.display = 'block'; // Afficher la section d'authentification
-        appSection.style.display = 'none';   // Cacher la section principale de l'app
-        signupForm.reset();
-    } catch (error) {
-        console.error("Erreur lors de l'inscription:", error);
-        alert('Erreur lors de l\'inscription: ' + error.message);
-    }
-});
+        try {
+            const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+            const user = userCredential.user;
+            alert('Inscription réussie ! Vous allez être redirigé vers la page de connexion.');
+            window.location.href = 'login.html'; // Rediriger vers login après inscription
+            signupForm.reset();
+        } catch (error) {
+            console.error("Erreur lors de l'inscription:", error);
+            alert('Erreur lors de l\'inscription: ' + error.message);
+        }
+    });
+}
 
-loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = loginForm.loginEmail.value;
-    const password = loginForm.loginPassword.value;
+// Gestion du formulaire de connexion (seulement si loginForm existe sur la page)
+if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = loginForm.loginEmail.value;
+        const password = loginForm.loginPassword.value;
 
-    try {
-        await auth.signInWithEmailAndPassword(email, password);
-        // Le code après la connexion réussie est géré dans l'observeur d'état d'authentification (authStateObserver)
-        loginForm.reset();
-    } catch (error) {
-        console.error("Erreur lors de la connexion:", error);
-        alert('Erreur lors de la connexion: ' + error.message);
-    }
-});
+        try {
+            await auth.signInWithEmailAndPassword(email, password);
+            // En cas de succès, l'observeur d'état d'authentification (auth.onAuthStateChanged) se chargera de rediriger vers index.html
+            loginForm.reset();
+        } catch (error) {
+            console.error("Erreur lors de la connexion:", error);
+            alert('Erreur lors de la connexion: ' + error.message);
+        }
+    });
+}
+
 
 logoutButton.addEventListener('click', async () => {
     try {
         await auth.signOut();
-        // Le code après la déconnexion est géré dans l'observeur d'état d'authentification (authStateObserver)
+        // En cas de succès, l'observeur d'état d'authentification (auth.onAuthStateChanged) se chargera de mettre à jour l'affichage
     } catch (error) {
         console.error("Erreur lors de la déconnexion:", error);
         alert('Erreur lors de la déconnexion.');
@@ -223,22 +231,31 @@ logoutButton.addEventListener('click', async () => {
 auth.onAuthStateChanged(user => {
     if (user) {
         // Utilisateur connecté
-        authSection.style.display = 'none'; // Cacher la section d'authentification
+        // Rediriger vers index.html si on est sur login.html ou signup.html après connexion réussie
+        if (window.location.pathname.endsWith('login.html') || window.location.pathname.endsWith('signup.html')) {
+            window.location.href = 'index.html';
+            return; // Important de sortir pour éviter d'exécuter le reste du code ci-dessous inutilement sur index.html après redirection
+        }
+
+        initialSection.style.display = 'none'; // Cacher la section initiale sur index.html
         appSection.style.display = 'block';   // Afficher la section principale de l'app
         userInfoSpan.textContent = user.email;
         displayChallenge(); // Afficher le défi du jour
         fetchPosts();      // Charger les posts
     } else {
         // Utilisateur déconnecté
-        authSection.style.display = 'block'; // Afficher la section d'authentification
-        appSection.style.display = 'none';   // Cacher la section principale de l'app
-        userInfoSpan.textContent = '';
-        postsListDiv.innerHTML = ''; // Vider la liste des posts
-        challengeTextDisplay.textContent = 'Connectez-vous pour voir le défi';
+        if (window.location.pathname.endsWith('index.html')) {
+            appSection.style.display = 'none';   // Cacher la section principale de l'app sur index.html
+            initialSection.style.display = 'block'; // Afficher la section initiale sur index.html
+            userInfoSpan.textContent = '';
+            postsListDiv.innerHTML = ''; // Vider la liste des posts
+            challengeTextDisplay.textContent = 'Connectez-vous pour voir le défi';
+        }
+        // Si on est sur login.html ou signup.html, ne rien faire de spécial, laisser les formulaires d'auth affichés
     }
 });
 
-// --- GESTION DES POSTS ---
+// --- GESTION DES POSTS --- (inchangé)
 submitPostButton.addEventListener('click', async () => {
     const content = postContentInput.value;
     const imageFile = postImageInput.files[0];
@@ -253,7 +270,7 @@ submitPostButton.addEventListener('click', async () => {
 });
 
 
-// --- SERVICE WORKER (Pour PWA - fichier séparé service-worker.js) ---
+// --- SERVICE WORKER (Pour PWA - fichier séparé service-worker.js) --- (inchangé)
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/service-worker.js')
