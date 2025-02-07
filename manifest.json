@@ -1,8 +1,8 @@
 {
-    "name": "BlinkIt",  /* Nom de l'application mis à jour */
-    "short_name": "BlinkIt", /* Nom court mis à jour */
+    "name": "BlinkIt",
+    "short_name": "BlinkIt",
     "description": "Mini-challenges amusants entre amis",
-    "start_url": "/",
+    "start_url": "/login_signup.html", /* Modifier start_url pour pointer vers login_signup.html */
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#3498db",
