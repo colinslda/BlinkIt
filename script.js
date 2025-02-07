@@ -1,25 +1,24 @@
-// Importation des modules Firebase (à configurer dans votre projet)
-// Assurez-vous d'avoir ajouté Firebase à votre projet (via CDN ou npm si bundling)
-// Exemple avec CDN:
-// <script src="https://www.gstatic.com/firebasejs/10.x.x/firebase-app-compat.js"></script>
-// <script src="https://www.gstatic.com/firebasejs/10.x.x/firebase-auth-compat.js"></script>
-// <script src="https://www.gstatic.com/firebasejs/10.x.x/firebase-firestore-compat.js"></script>
+// Importation des modules Firebase
+import { initializeApp } from 'firebase/app';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, collection, addDoc, getDocs, orderBy, serverTimestamp, doc, updateDoc, increment } from 'firebase/firestore';
 
 // Configuration Firebase (remplacez avec vos propres informations)
 const firebaseConfig = {
-    apiKey: "VOTRE_API_KEY",
-    authDomain: "VOTRE_AUTH_DOMAIN",
-    projectId: "VOTRE_PROJECT_ID",
-    storageBucket: "VOTRE_STORAGE_BUCKET",
-    messagingSenderId: "VOTRE_MESSAGING_SENDER_ID",
-    appId: "VOTRE_APP_ID",
-    databaseURL: "VOTRE_DATABASE_URL" // Si vous utilisez Realtime Database
+    apiKey: "AIzaSyBzxLd2CtrDwrbdvCpJcmWreCFYzus4pxc",
+    authDomain: "cocoapp-59806.firebaseapp.com",
+    projectId: "cocoapp-59806",
+    storageBucket: "cocoapp-59806.firebasestorage.app",
+    messagingSenderId: "150646140905",
+    appId: "1:150646140905:web:fe18d100afd0d88dc9e578",
+    databaseURL: "https://cocoapp-59806-default-rtdb.firebaseio.com/" // Si vous utilisez Realtime Database
 };
 
 // Initialisation de Firebase
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore(); // Utilisation de Firestore
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app); // Utilisation de Firestore
+
 
 // Sélection des éléments HTML (mis à jour pour index.html)
 const appSection = document.getElementById('app-section');
@@ -60,7 +59,7 @@ function displayChallenge() {
     challengeTextDisplay.textContent = currentChallenge;
 }
 
-// Fonction pour créer un post sur Firebase (inchangée)
+// Fonction pour créer un post sur Firebase (inchangée - mise à jour pour Firestore v9+)
 async function createPost(content, imageFile, audioFile, userId, userEmail) {
     try {
         const postData = {
@@ -68,7 +67,7 @@ async function createPost(content, imageFile, audioFile, userId, userEmail) {
             userEmail: userEmail,
             challenge: currentChallenge,
             content: content,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            timestamp: serverTimestamp(), // Utilisation de serverTimestamp() depuis Firebase v9+
             reactions: {
                 votes: 0,
                 likes: 0
@@ -88,7 +87,9 @@ async function createPost(content, imageFile, audioFile, userId, userEmail) {
             // postData.audioUrl = audioUrlFromStorage;
         }
 
-        await db.collection('posts').add(postData);
+        const postsCollectionRef = collection(db, 'posts'); // Référence à la collection 'posts'
+        await addDoc(postsCollectionRef, postData); // Ajout du document à la collection
+
         alert('Réponse postée avec succès !');
         postContentInput.value = '';
         postImageInput.value = '';
@@ -101,15 +102,18 @@ async function createPost(content, imageFile, audioFile, userId, userEmail) {
 }
 
 
-// Fonction pour récupérer et afficher les posts depuis Firebase (inchangée)
+// Fonction pour récupérer et afficher les posts depuis Firebase (inchangée - mise à jour pour Firestore v9+)
 async function fetchPosts() {
     postsListDiv.innerHTML = ''; // Vider la liste actuelle
 
     try {
-        const postsSnapshot = await db.collection('posts').orderBy('timestamp', 'desc').get();
-        postsSnapshot.forEach(doc => {
-            const post = doc.data();
-            const postId = doc.id;
+        const postsCollectionRef = collection(db, 'posts'); // Référence à la collection 'posts'
+        const q = query(postsCollectionRef, orderBy('timestamp', 'desc')); // Requête pour ordonner par timestamp décroissant
+        const postsSnapshot = await getDocs(q); // Récupération des documents соответсвия requête
+
+        postsSnapshot.forEach(docSnap => { // docChanges est remplacé par docSnap pour Firestore v9+
+            const post = docSnap.data();
+            const postId = docSnap.id;
             const postElement = createPostElement(postId, post);
             postsListDiv.prepend(postElement); // Ajouter au début pour afficher les plus récents en premier
         });
@@ -155,20 +159,19 @@ function createPostElement(postId, postData) {
     return postDiv;
 }
 
-// Fonction pour mettre à jour les réactions (votes, likes) sur Firebase (inchangée)
+// Fonction pour mettre à jour les réactions (votes, likes) sur Firebase (inchangée - mise à jour pour Firestore v9+)
 async function updateReaction(postId, reactionType) {
     try {
-        const postRef = db.collection('posts').doc(postId);
-        const increment = firebase.firestore.FieldValue.increment(1);
+        const postRef = doc(db, 'posts', postId); // Référence au document du post
 
         let updateObject = {};
         if (reactionType === 'votes') {
-            updateObject['reactions.votes'] = increment;
+            updateObject['reactions.votes'] = increment(1); // Utilisation de increment() depuis Firebase v9+
         } else if (reactionType === 'likes') {
-            updateObject['reactions.likes'] = increment;
+            updateObject['reactions.likes'] = increment(1); // Utilisation de increment() depuis Firebase v9+
         }
 
-        await postRef.update(updateObject);
+        await updateDoc(postRef, updateObject); // Mise à jour du document
         fetchPosts(); // Rafraîchir les posts pour mettre à jour l'affichage des réactions
     } catch (error) {
         console.error("Erreur lors de la mise à jour de la réaction:", error);
@@ -186,7 +189,7 @@ if (signupForm) {
         const password = signupForm.signupPassword.value;
 
         try {
-            const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password); // createUserWithEmailAndPassword v9+
             const user = userCredential.user;
             alert('Inscription réussie ! Vous allez être redirigé vers la page de connexion.');
             window.location.href = 'login.html'; // Rediriger vers login après inscription
@@ -206,8 +209,9 @@ if (loginForm) {
         const password = loginForm.loginPassword.value;
 
         try {
-            await auth.signInWithEmailAndPassword(email, password);
-            // En cas de succès, l'observeur d'état d'authentification (auth.onAuthStateChanged) se chargera de rediriger vers index.html
+            await signInWithEmailAndPassword(auth, email, password); // signInWithEmailAndPassword v9+
+            // Redirection immédiate après connexion réussie - AJOUTÉ ICI !
+            window.location.href = 'index.html';
             loginForm.reset();
         } catch (error) {
             console.error("Erreur lors de la connexion:", error);
@@ -219,7 +223,7 @@ if (loginForm) {
 
 logoutButton.addEventListener('click', async () => {
     try {
-        await auth.signOut();
+        await signOut(auth); // signOut v9+
         // En cas de succès, l'observeur d'état d'authentification (auth.onAuthStateChanged) se chargera de mettre à jour l'affichage
     } catch (error) {
         console.error("Erreur lors de la déconnexion:", error);
@@ -228,13 +232,12 @@ logoutButton.addEventListener('click', async () => {
 });
 
 // Observeur d'état d'authentification (pour gérer l'état connecté/déconnecté)
-auth.onAuthStateChanged(user => {
+onAuthStateChanged(auth, (user) => { // onAuthStateChanged v9+
     if (user) {
         // Utilisateur connecté
         // Rediriger vers index.html si on est sur login.html ou signup.html après connexion réussie
         if (window.location.pathname.endsWith('login.html') || window.location.pathname.endsWith('signup.html')) {
             window.location.href = 'index.html';
-            return; // Important de sortir pour éviter d'exécuter le reste du code ci-dessous inutilement sur index.html après redirection
         }
 
         initialSection.style.display = 'none'; // Cacher la section initiale sur index.html
