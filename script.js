@@ -5,13 +5,13 @@ import { getFirestore, collection, addDoc, getDocs, orderBy, serverTimestamp, do
 
 // Configuration Firebase (remplacez avec vos propres informations)
 const firebaseConfig = {
-    apiKey: "AIzaSyBzxLd2CtrDwrbdvCpJcmWreCFYzus4pxc",
-    authDomain: "cocoapp-59806.firebaseapp.com",
-    projectId: "cocoapp-59806",
-    storageBucket: "cocoapp-59806.firebasestorage.app",
-    messagingSenderId: "150646140905",
-    appId: "1:150646140905:web:fe18d100afd0d88dc9e578",
-    databaseURL: "https://cocoapp-59806-default-rtdb.firebaseio.com/" // Si vous utilisez Realtime Database
+    apiKey: "VOTRE_API_KEY",
+    authDomain: "VOTRE_AUTH_DOMAIN",
+    projectId: "VOTRE_PROJECT_ID",
+    storageBucket: "VOTRE_STORAGE_BUCKET",
+    messagingSenderId: "VOTRE_MESSAGING_SENDER_ID",
+    appId: "VOTRE_APP_ID",
+    databaseURL: "VOTRE_DATABASE_URL" // Si vous utilisez Realtime Database
 };
 
 // Initialisation de Firebase
@@ -20,7 +20,7 @@ const auth = getAuth(app);
 const db = getFirestore(app); // Utilisation de Firestore
 
 
-// Sélection des éléments HTML (mis à jour pour index.html)
+// Sélection des éléments HTML (mis à jour pour main.html)
 const appSection = document.getElementById('app-section');
 const logoutButton = document.getElementById('logout-button');
 const userInfoSpan = document.getElementById('user-email');
@@ -31,7 +31,9 @@ const postImageInput = document.getElementById('post-image');
 const postAudioInput = document.getElementById('post-audio');
 const submitPostButton = document.getElementById('submit-post-button');
 const postsListDiv = document.getElementById('posts-list');
-const initialSection = document.getElementById('initial-section'); // Nouvelle section d'accueil
+
+// Sélection des éléments HTML pour login_signup.html (seulement si on est sur cette page)
+const initialSection = document.getElementById('initial-section'); // Seulement sur login_signup.html
 
 // Sélection des éléments HTML pour login.html et signup.html (seulement si on est sur ces pages)
 const signupForm = document.getElementById('signup-form'); // Seulement sur signup.html
@@ -211,7 +213,7 @@ if (loginForm) {
         try {
             await signInWithEmailAndPassword(auth, email, password); // signInWithEmailAndPassword v9+
             // Redirection immédiate après connexion réussie - AJOUTÉ ICI !
-            window.location.href = 'index.html';
+            window.location.href = 'main.html'; // Rediriger vers main.html après connexion
             loginForm.reset();
         } catch (error) {
             console.error("Erreur lors de la connexion:", error);
@@ -235,21 +237,30 @@ logoutButton.addEventListener('click', async () => {
 onAuthStateChanged(auth, (user) => { // onAuthStateChanged v9+
     if (user) {
         // Utilisateur connecté
-        // Rediriger vers index.html si on est sur login.html ou signup.html après connexion réussie
-        if (window.location.pathname.endsWith('login.html') || window.location.pathname.endsWith('signup.html')) {
-            window.location.href = 'index.html';
+        // Rediriger vers main.html si on est sur login.html ou signup.html après connexion réussie
+        if (window.location.pathname.endsWith('login.html') || window.location.pathname.endsWith('signup.html') || window.location.pathname.endsWith('login_signup.html')) {
+            window.location.href = 'main.html';
+        }
+        // Si on est sur main.html et connecté, afficher l'app
+        if (window.location.pathname.endsWith('main.html')) {
+            appSection.style.display = 'block';   // Afficher la section principale de l'app sur main.html
+            initialSection.style.display = 'none'; // Cacher la section initiale (qui n'existe pas sur main.html, mais pour éviter des erreurs JS)
+            userInfoSpan.textContent = user.email;
+            displayChallenge(); // Afficher le défi du jour
+            fetchPosts();      // Charger les posts
         }
 
-        initialSection.style.display = 'none'; // Cacher la section initiale sur index.html
-        appSection.style.display = 'block';   // Afficher la section principale de l'app
-        userInfoSpan.textContent = user.email;
-        displayChallenge(); // Afficher le défi du jour
-        fetchPosts();      // Charger les posts
+
     } else {
         // Utilisateur déconnecté
-        if (window.location.pathname.endsWith('index.html')) {
-            appSection.style.display = 'none';   // Cacher la section principale de l'app sur index.html
-            initialSection.style.display = 'block'; // Afficher la section initiale sur index.html
+        // Si on est sur main.html et déconnecté, rediriger vers login_signup.html
+        if (window.location.pathname.endsWith('main.html')) {
+            window.location.href = 'login_signup.html';
+        }
+        // Si on est sur login_signup.html, afficher la section initiale
+        if (window.location.pathname.endsWith('login_signup.html')) {
+            appSection.style.display = 'none';   // Cacher la section principale de l'app (qui n'existe pas sur login_signup.html, mais pour éviter des erreurs JS)
+            initialSection.style.display = 'block'; // Afficher la section initiale sur login_signup.html
             userInfoSpan.textContent = '';
             postsListDiv.innerHTML = ''; // Vider la liste des posts
             challengeTextDisplay.textContent = 'Connectez-vous pour voir le défi';
