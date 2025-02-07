@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Défi Express</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Défi Express</h1>
+    </header>
+
+    <main>
+        <section id="auth-section">
+            <h2>Connexion / Inscription</h2>
+            <div id="auth-forms">
+                <form id="signup-form">
+                    <input type="email" id="signup-email" placeholder="Email" required>
+                    <input type="password" id="signup-password" placeholder="Mot de passe" required>
+                    <button type="submit">S'inscrire</button>
+                </form>
+                <form id="login-form">
+                    <input type="email" id="login-email" placeholder="Email" required>
+                    <input type="password" id="login-password" placeholder="Mot de passe" required>
+                    <button type="submit">Se connecter</button>
+                </form>
+            </div>
+        </section>
+
+        <section id="app-section" style="display: none;">
+            <div id="user-info">
+                <span id="user-email"></span>
+                <button id="logout-button">Se déconnecter</button>
+            </div>
+
+            <section id="challenge-section">
+                <h2>Défi du Jour</h2>
+                <div id="challenge-display">
+                    <p id="challenge-text">Chargement du défi...</p>
+                </div>
+            </section>
+
+            <section id="post-creation-section">
+                <h2>Partager votre réponse</h2>
+                <div id="post-form">
+                    <textarea id="post-content" placeholder="Votre réponse (texte)"></textarea>
+                    <input type="file" id="post-image" accept="image/*">
+                    <input type="file" id="post-audio" accept="audio/*">
+                    <button id="submit-post-button">Envoyer la réponse</button>
+                </div>
+            </section>
+
+            <section id="posts-section">
+                <h2>Défis et Réponses des Amis</h2>
+                <div id="posts-list">
+                    </div>
+            </section>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Défi Express</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
